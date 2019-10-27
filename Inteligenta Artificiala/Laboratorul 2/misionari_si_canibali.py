@@ -11,58 +11,50 @@ def checkValidity(item):
 def getPosibilities(state):
     boatPosibility = []
     if state['boat'][0] == 1:
-        if state['boat'].count(0) <= len(state['m1'])-1:
+        if state['boat'].count(0) <= len(state['m1']):
             for options in combinations(state['m1'], state['boat'].count(0)):
                 if checkValidity(options):
                     boatPosibility.append(options)
         else:
             for options in state['m1']:
                 boatPosibility.append(options)
-    else:
-        random.choice(state['m2'])
-    print (boatPosibility)
+            return boatPosibility
+    elif state['boat'][0]==2:
+        return random.choice(state['m2'])
     return list(random.choice(boatPosibility))
 
 
-def moveBoat(state):
-    if state['boat'][0] == 1:
-        state['boat'][0] == 2
-    else:
-        state['boat'][0] == 1
-
-
 def insertInBoat(state, persons):
-    shore = 'm' + str(state['boat'][0])
-    personIndex = 0
-    for index, item in enumerate(state['boat']):
-        if item == 0:
-            print(personIndex)
-            print(persons)
-            if persons[personIndex]:
-                state['boat'][index] = persons[personIndex]
-                personIndex += 1
-    personIndex = 0
-    for item in state[shore]:
-        for option in persons:
-            if item == option:
-                state[shore].remove(item)
+    boatIndex = 1
+    print(persons)
+    for item in persons:
+        if state['boat'][boatIndex] == 0:
+            state['boat'][boatIndex] = item
+            boatIndex += 1
+            state['m'+str(state['boat'][0])].remove(item)
+    
+    if state['boat'][0]==1:
+        state['boat'][0]=2
+    else:
+        state['boat'][0]=1
     return state
 
 
 def removeFromBoat(state):
     shore = 'm' + str(state['boat'][0])
-    if shore == 'm1':
-        shore = 'm2'
-    else:
-        shore = 'm1'
-
-    for item in state['boat']:
-        if item != 1 and item != 2:
+    for index, item in enumerate(state['boat']):
+        if item != 0 and index != 0:
             state[shore].append(item)
-
-    for index in range(1, len(state['boat'])):
-        state['boat'][index] = 0
+            state['boat'][index] = 0
     return state
+
+
+def makeMove(state):
+    newState = {}
+    newState = insertInBoat(state, getPosibilities(state))
+    newState = removeFromBoat(state)
+    print(newState)
+    return newState
 
 
 def checkFinal(state):
@@ -72,11 +64,11 @@ def checkFinal(state):
 
 
 def startGame(state):
-    if checkValidity(state['m1']):
+    visitedStates = []
+    if checkValidity(state['m1']) and checkValidity(state['m2']):
         while checkFinal(state) == False:
-            state = insertInBoat(state, getPosibilities(state))
-            state = removeFromBoat(state)
-            print(state)
+            state = makeMove(state)
+            visitedStates.append(state)
     else:
         return 0
 
